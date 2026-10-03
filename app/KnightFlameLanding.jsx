@@ -1,35 +1,32 @@
 'use client';
 
-/**
- * Knight Flame — single-file landing page
- * Next.js (App Router) client component. Tailwind for layout, scoped CSS for brand material.
- *
- * Drop in at:  app/page.jsx      →  export default from this file
- * Fonts:       the @import at the top of <BrandStyles/> can be moved to app/globals.css,
- *              or swapped for next/font/google (Saira, Saira_Condensed, Inter_Tight).
- * Images:      product tiles render line-art plates. Swap <Plate/> for <Image/> when
- *              real photography is ready — every tile already accepts a `src` prop.
- */
 
+import Link from 'next/link';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 
-/* ────────────────────────────────────────────────────────────
-   BRAND CONSTANTS
-   ──────────────────────────────────────────────────────────── */
+
 
 const BRAND = {
   name: 'Knight Flame',
   tagline: 'Serving you since 2010',
   facebook: 'https://www.facebook.com/share/1EinrXcYBo/',
   instagram: 'https://www.instagram.com/knightflameindustries?igsh=MTJpYWVtcnlvOHVweQ==',
-  // TODO: replace with real business details before launch
+
   phone: '+91 00000 00000',
   email: 'sales@knightflame.in',
   city: 'India',
 };
 
+const IMG = {
+  logo: '/logo.jpeg',
+  // Big photo in the Bahubali section.
+  bahubali: '/images/gas stove7.png',
+};
+
 /* ────────────────────────────────────────────────────────────
-   CATALOGUE DATA — every line from the brief lives here
+   EDIT #2 — CATALOGUE
+   Each product's `img` is its photo. Stoves also take `imgByVariant`,
+   so the picture changes when the visitor taps 2 / 3 / 4 Burner.
    ──────────────────────────────────────────────────────────── */
 
 const GROUPS = [
@@ -41,8 +38,12 @@ const GROUPS = [
       {
         id: 'ss',
         name: 'Stainless Steel Gas Stoves',
-        icon: 'stove',
-        burners: 3,
+        img: '/images/products/ss-gas-stove-3-burner.png',
+        imgByVariant: {
+          '2 Burner': '/images/gas stove5.png',
+          '3 Burner': '/images/gas stove2.png',
+          '4 Burner': '/images/gas stove7.png',
+        },
         blurb: 'Full stainless body, brass burners, powder-coated pan supports. The workhorse of the range.',
         variants: ['2 Burner', '3 Burner', '4 Burner'],
         specs: [['Body', '304-grade steel'], ['Burner', 'Brass'], ['Finish', 'Matte / mirror']],
@@ -50,8 +51,12 @@ const GROUPS = [
       {
         id: 'glass',
         name: 'Glass Top Gas Stoves',
-        icon: 'glass',
-        burners: 3,
+        img: '/images/products/glass-gas-stove-3-burner.png',
+        imgByVariant: {
+          '2 Burner': '/images/gas stove4.png',
+          '3 Burner': '/images/gas stove3.png',
+          '4 Burner': '/images/gas stove7.png',
+        },
         blurb: '6 mm toughened glass over a steel frame. Wipes clean in a stroke, holds its gloss for years.',
         variants: ['2 Burner', '3 Burner', '4 Burner'],
         specs: [['Top', '6 mm toughened'], ['Frame', 'Powder-coated'], ['Knobs', 'Euro-style']],
@@ -59,8 +64,12 @@ const GROUPS = [
       {
         id: 'bahubali',
         name: 'Bahubali Gas Stoves',
-        icon: 'bahubali',
-        burners: 4,
+        img: '/images/products/bahubali-gas-stove-4-burner.png',
+        imgByVariant: {
+          '2 Burner': '/images/gas stove4.png',
+          '3 Burner': '/images/gas stove6.png',
+          '4 Burner': '/images/gas stove7.png',
+        },
         blurb: 'Our heavy-duty line. Thicker frame, wider pan supports, high-flow burners built for big vessels.',
         variants: ['2 Burner', '3 Burner', '4 Burner'],
         specs: [['Grade', 'Heavy duty'], ['Pan support', 'Extra wide'], ['Burner', 'High flow brass']],
@@ -68,8 +77,11 @@ const GROUPS = [
       {
         id: 'hob',
         name: 'Premium Hobtops',
-        icon: 'hob',
-        burners: 4,
+        img: '/images/products/hobtop-4-burner.png',
+        imgByVariant: {
+          '3 Burner': '/images/gas stove6.png',
+          '4 Burner': '/images/gas stove7.png',
+        },
         blurb: 'Built-in hobs with auto-ignition and cast iron pan supports. Sits flush into the counter.',
         variants: ['3 Burner', '4 Burner'],
         specs: [['Mount', 'Built-in'], ['Ignition', 'Auto'], ['Support', 'Cast iron']],
@@ -84,7 +96,7 @@ const GROUPS = [
       {
         id: 'classy',
         name: 'Classy Aluminium',
-        icon: 'cooker',
+        img: '/images/cooker.png',
         blurb: 'Light, fast, forgiving. The everyday cooker that heats quickly and costs least to run.',
         variants: ['3 L', '5 L', '7.5 L'],
         specs: [['Metal', 'Virgin aluminium'], ['Lid', 'Outer'], ['Base', 'Induction: no']],
@@ -92,7 +104,7 @@ const GROUPS = [
       {
         id: 'black',
         name: 'Black Elegance Hard Anodised',
-        icon: 'cooker',
+        img: '/images/cooker2.png',
         blurb: 'Anodised to a surface harder than steel. Non-reactive with tamarind, tomato and curd.',
         variants: ['3 L', '5 L', '7.5 L'],
         specs: [['Metal', 'Hard anodised'], ['Lid', 'Inner'], ['Base', 'Induction: no']],
@@ -100,7 +112,7 @@ const GROUPS = [
       {
         id: 'inox',
         name: 'Inox Stainless Steel',
-        icon: 'cooker',
+        img: '/images/cooker.png',
         blurb: 'Mirror-polished steel with a sandwich bottom. Goes from gas to induction without a thought.',
         variants: ['3 L', '5 L', '7.5 L'],
         specs: [['Metal', 'Stainless steel'], ['Lid', 'Inner'], ['Base', 'Induction: yes']],
@@ -108,7 +120,7 @@ const GROUPS = [
       {
         id: 'steelx',
         name: 'Steel-X Triply',
-        icon: 'cooker',
+        img: '/images/cooker3.png',
         blurb: 'Steel, aluminium, steel — bonded. Even heat right to the rim, no scorching at the centre.',
         variants: ['3 L', '5 L', '6 L'],
         specs: [['Metal', 'Triply bonded'], ['Lid', 'Inner'], ['Base', 'Induction: yes']],
@@ -123,7 +135,7 @@ const GROUPS = [
       {
         id: 'ha',
         name: 'Hard Anodised Cookware',
-        icon: 'kadai',
+        img: '/images/tawa.png',
         blurb: 'Deep charcoal finish that will not react with acidic masala. Kadai, tawa, fry pan, sauce pan.',
         variants: ['Kadai', 'Tawa', 'Fry pan', 'Sauce pan'],
         specs: [['Surface', 'Anodised'], ['Heat', 'Even'], ['Care', 'Hand wash']],
@@ -131,7 +143,7 @@ const GROUPS = [
       {
         id: 'triply',
         name: 'Triply Cookware',
-        icon: 'triply',
+        img: '/images/kadhai3.png',
         blurb: 'Three bonded layers for restaurant-grade control. Induction and gas, both without adjustment.',
         variants: ['Kadai', 'Fry pan', 'Sauce pan', 'Casserole'],
         specs: [['Layers', 'Steel–Al–Steel'], ['Induction', 'Yes'], ['Care', 'Dishwasher safe']],
@@ -139,7 +151,7 @@ const GROUPS = [
       {
         id: 'honeycomb',
         name: 'Honeycomb Cookware',
-        icon: 'honeycomb',
+        img: '/images/kadhai2.png',
         blurb: 'Laser-etched honeycomb texture lifts food off the surface — less oil, less sticking.',
         variants: ['Fry pan', 'Tawa', 'Kadai'],
         specs: [['Surface', 'Etched steel'], ['Oil', 'Low'], ['Metal spoon', 'Safe']],
@@ -154,7 +166,7 @@ const GROUPS = [
       {
         id: 'induction',
         name: 'Infrared / Induction Cooktops',
-        icon: 'induction',
+        img: '/images/induction2.png',
         blurb: 'Infrared for any vessel, induction for speed. Preset menus and a glass top that stays cool at the edge.',
         variants: ['Induction', 'Infrared'],
         specs: [['Power', '1200–2000 W'], ['Top', 'Ceramic glass'], ['Presets', 'Indian menu']],
@@ -162,7 +174,7 @@ const GROUPS = [
       {
         id: 'mixer',
         name: 'Mixer Grinders',
-        icon: 'mixer',
+        img: '/images/mixer.png',
         blurb: 'Copper-wound motors and stainless jars sized for chutney, masala and daily wet grinding.',
         variants: ['3 jar', '4 jar'],
         specs: [['Motor', '750 W copper'], ['Jars', 'Stainless'], ['Speeds', '3 + pulse']],
@@ -170,7 +182,7 @@ const GROUPS = [
       {
         id: 'kettle',
         name: 'Electric Kettles',
-        icon: 'kettle',
+        img: '/images/kettle.png',
         blurb: 'Steel interior, concealed element, auto cut-off. Boils and stops without being watched.',
         variants: ['1.2 L', '1.5 L', '1.8 L'],
         specs: [['Body', 'Stainless'], ['Cut-off', 'Auto + dry'], ['Base', '360° cordless']],
@@ -178,7 +190,7 @@ const GROUPS = [
       {
         id: 'iron',
         name: 'Electric Irons',
-        icon: 'iron',
+        img: '/images/iron.png',
         blurb: 'Non-stick and steam variants with a weighted sole plate that presses cotton flat in one pass.',
         variants: ['Dry', 'Steam'],
         specs: [['Sole', 'Non-stick'], ['Cord', '360° swivel'], ['Thermostat', 'Adjustable']],
@@ -186,7 +198,7 @@ const GROUPS = [
       {
         id: 'lighter',
         name: 'Kitchen Lighters',
-        icon: 'lighter',
+        img: '/images/lighter.png',
         blurb: 'Refillable gas lighters with a long steel nozzle and a click that lasts thousands of sparks.',
         variants: ['Refillable', 'Electronic'],
         specs: [['Nozzle', 'Steel'], ['Refill', 'Butane'], ['Sparks', '20,000+']],
@@ -194,7 +206,7 @@ const GROUPS = [
       {
         id: 'hose',
         name: 'Kitchen Hose Pipe',
-        icon: 'hose',
+        img: '/images/hose-pipe.png',
         blurb: 'ISI-marked LPG hose, braided and flame-retardant. The cheapest part of the kitchen to get right.',
         variants: ['1.5 m', '2 m'],
         specs: [['Standard', 'ISI marked'], ['Build', 'Braided'], ['Life', '5 years']],
@@ -236,11 +248,11 @@ const REASONS = [
 ];
 
 const PROCESS = [
-  { n: '01', title: 'Metal in', body: 'Steel coil, aluminium ingot and brass rod arrive with mill certificates and are lot-tagged on receipt.' },
-  { n: '02', title: 'Press & form', body: 'Bodies are pressed, deep-drawn and trimmed. Cooker bodies are spun and their rims machined to seal.' },
-  { n: '03', title: 'Burner machining', body: 'Brass burners are cast, then ports are drilled and gauged so flame height matches across every head.' },
-  { n: '04', title: 'Finish', body: 'Powder coat, anodising or mirror polish, depending on the line. Glass tops are toughened and bonded.' },
-  { n: '05', title: 'Flame test', body: 'Each unit is gas-charged, leak-checked and burned. It is boxed only after the flame reads clean and blue.' },
+  { n: '01', title: 'Metal in', img: '/images/process1.png', body: 'Steel coil, aluminium ingot and brass rod arrive with mill certificates and are lot-tagged on receipt.' },
+  { n: '02', title: 'Press & form', img: '/images/process2.png', body: 'Bodies are pressed, deep-drawn and trimmed. Cooker bodies are spun and their rims machined to seal.' },
+  { n: '03', title: 'Burner machining', img: '/images/process3.png', body: 'Brass burners are cast, then ports are drilled and gauged so flame height matches across every head.' },
+  { n: '04', title: 'Finish', img: '/images/process4.png', body: 'Powder coat, anodising or mirror polish, depending on the line. Glass tops are toughened and bonded.' },
+  { n: '05', title: 'Flame test', img: '/images/process5.png', body: 'Each unit is gas-charged, leak-checked and burned. It is boxed only after the flame reads clean and blue.' },
 ];
 
 const STATS = [
@@ -251,10 +263,10 @@ const STATS = [
 ];
 
 const REVIEWS = [
-  { quote: 'We switched our showroom to Knight Flame three years ago. The Bahubali 4-burner outsells everything else on the floor and we have never had a batch returned.', name: 'Ramesh Patel', role: 'Distributor, Ahmedabad' },
-  { quote: 'Bought the glass top in 2019 and it still lights on the first click. The service boy came with the right burner in hand, not a week later.', name: 'Sunita Rao', role: 'Home customer, Pune' },
-  { quote: 'The triply cookers hold pressure evenly, which matters when we are running six of them at once. Sturdy handles, and the gaskets last.', name: 'Imran Sheikh', role: 'Cloud kitchen owner, Delhi' },
-  { quote: 'Margins are fair and replacements are quick. That is really all a retailer wants from a brand.', name: 'Karthik Menon', role: 'Retailer, Kochi' },
+  { quote: 'We switched our showroom to Knight Flame three years ago. The Bahubali 4-burner outsells everything else on the floor and we have never had a batch returned.', name: 'Ramesh Patel', role: 'Distributor, Ahmedabad', img: '/images/people/ramesh-patel.jpg' },
+  { quote: 'Bought the glass top in 2019 and it still lights on the first click. The service boy came with the right burner in hand, not a week later.', name: 'Sunita Rao', role: 'Home customer, Pune', img: '/images/people/sunita-rao.jpg' },
+  { quote: 'The triply cookers hold pressure evenly, which matters when we are running six of them at once. Sturdy handles, and the gaskets last.', name: 'Imran Sheikh', role: 'Cloud kitchen owner, Delhi', img: '/images/people/imran-sheikh.jpg' },
+  { quote: 'Margins are fair and replacements are quick. That is really all a retailer wants from a brand.', name: 'Karthik Menon', role: 'Retailer, Kochi', img: '/images/people/karthik-menon.jpg' },
 ];
 
 const FAQS = [
@@ -278,7 +290,6 @@ const NAV = [
 /* ────────────────────────────────────────────────────────────
    BRAND STYLESHEET
    Scoped under .kf so it can never leak into the rest of the app.
-   Move the @import into globals.css (or swap for next/font) in production.
    ──────────────────────────────────────────────────────────── */
 
 function BrandStyles() {
@@ -307,14 +318,29 @@ function BrandStyles() {
   background-image:linear-gradient(100deg,var(--gold-lo) 0%,var(--gold) 20%,var(--gold-hi) 42%,var(--gold) 60%,var(--gold-lo) 100%);
   -webkit-background-clip:text;background-clip:text;color:transparent;
 }
+
+/* ── IMAGES ──────────────────────────────────────────────────
+   Every photo sits in one of these frames. .kf-img keeps the box
+   from collapsing before the file loads, so nothing jumps. */
+.kf-img{position:relative;display:block;overflow:hidden;width:100%;background:radial-gradient(circle at 50% 45%,rgba(211,167,95,.09),transparent 62%),#0E1013}
+.kf-img>img{display:block;width:100%;height:100%}
+.kf-img-pad>img{padding:var(--kf-imgpad,8%)}
+.kf-pad-tight{--kf-imgpad:3%}
+.kf-pad-none{--kf-imgpad:0}
+.kf-zoom>img{transition:transform .6s cubic-bezier(.2,.7,.2,1)}
+.kf-zoom:hover>img{transform:scale(1.05)}
+/* placeholder shown until the real file exists */
+.kf-img-wait{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.55rem;
+  padding:1rem;text-align:center;color:#565B63;border:1px dashed var(--steel)}
+.kf-img-path{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;line-height:1.5;color:#454A52;word-break:break-all;max-width:100%}
+
 .kf-panel{background:var(--panel);border:1px solid var(--steel)}
-.kf-panel2{background:var(--panel2)}
 .kf-hair{border-color:var(--steel)}
 
 /* riveted rating-plate treatment — the signature surface for product tiles */
 .kf-plate{position:relative;background:linear-gradient(158deg,#1A1D22 0%,#0E1013 62%,#121418 100%);border:1px solid var(--steel);isolation:isolate}
 .kf-plate::after{
-  content:"";position:absolute;inset:0;pointer-events:none;z-index:2;
+  content:"";position:absolute;inset:0;pointer-events:none;z-index:3;
   background-image:
     radial-gradient(circle,#5C626B 38%,rgba(0,0,0,.6) 42%,transparent 62%),
     radial-gradient(circle,#5C626B 38%,rgba(0,0,0,.6) 42%,transparent 62%),
@@ -324,7 +350,7 @@ function BrandStyles() {
   background-position:8px 8px,calc(100% - 8px) 8px,8px calc(100% - 8px),calc(100% - 8px) calc(100% - 8px);
 }
 .kf-plate:hover{border-color:#3E434C}
-.kf-plate-in{position:absolute;inset:6px;border:1px solid rgba(211,167,95,.10);pointer-events:none;z-index:1}
+.kf-plate-in{position:absolute;inset:6px;border:1px solid rgba(211,167,95,.10);pointer-events:none;z-index:2}
 
 /* brushed-gold hairline border */
 .kf-edge{
@@ -345,6 +371,12 @@ function BrandStyles() {
 .kf-cta-desk{display:none}
 @media (min-width:640px){.kf-cta-desk{display:inline-flex}}
 .kf a:focus-visible,.kf button:focus-visible,.kf input:focus-visible,.kf textarea:focus-visible,.kf select:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+
+/* variant chips that swap the product photo */
+.kf-chip{font-family:'Saira Condensed',sans-serif;text-transform:uppercase;letter-spacing:.16em;font-weight:600;font-size:10px;
+  padding:.4rem .8rem;border:1px solid var(--steel);color:var(--mute);background:transparent;cursor:pointer;transition:.2s ease}
+.kf-chip:hover{border-color:#4A505A;color:var(--cream)}
+.kf-chip[aria-pressed="true"]{border-color:var(--gold);color:var(--gold);background:rgba(211,167,95,.07)}
 
 /* inputs */
 .kf-field{width:100%;background:#0E1013;border:1px solid var(--steel);color:var(--cream);padding:.85rem 1rem;font-size:.95rem;transition:border-color .2s}
@@ -368,6 +400,8 @@ function BrandStyles() {
 .kf-spin-r{transform-origin:center;animation:kf-spin-r 22s linear infinite}
 .kf-flick{animation:kf-flick 1.6s ease-in-out infinite}
 .kf-breathe{transform-origin:center;animation:kf-breathe 4.5s ease-in-out infinite}
+@keyframes kf-fade{from{opacity:0}to{opacity:1}}
+.kf-fade{animation:kf-fade .45s ease}
 
 /* marquee */
 @keyframes kf-run{from{transform:translateX(0)}to{transform:translateX(-50%)}}
@@ -386,7 +420,8 @@ function BrandStyles() {
 }
 
 /* ────────────────────────────────────────────────────────────
-   ICONS — line art, currentColor, no dependencies
+   ICONS — interface only (arrows, phone, social). Product visuals
+   are photographs, handled by <ProductImage/> below.
    ──────────────────────────────────────────────────────────── */
 
 function Ico({ name, className = 'w-5 h-5', style }) {
@@ -406,6 +441,7 @@ function Ico({ name, className = 'w-5 h-5', style }) {
     phone: <path {...p} d="M6 3h3l1.8 4.2-2.1 1.5a12 12 0 0 0 5.6 5.6l1.5-2.1L20 16v3a2 2 0 0 1-2.2 2A16.8 16.8 0 0 1 3 6.2 2 2 0 0 1 5 4h1Z" />,
     mail: <path {...p} d="M3 6h18v12H3V6Zm0 .6 9 6.4 9-6.4" />,
     pin: <path {...p} d="M12 21s7-5.6 7-11a7 7 0 1 0-14 0c0 5.4 7 11 7 11Zm0-8.2a2.8 2.8 0 1 0 0-5.6 2.8 2.8 0 0 0 0 5.6Z" />,
+    image: <g><rect {...p} x="3" y="5" width="18" height="14" rx="2" /><circle {...p} cx="8.6" cy="10" r="1.6" /><path {...p} d="m4 17 5-4.6 4.4 3.8 3-2.4L20 17" /></g>,
     fb: <path fill="currentColor" d="M22 12a10 10 0 1 0-11.6 9.9v-7h-2.5V12h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.5h-1.3c-1.2 0-1.6.8-1.6 1.6V12h2.8l-.4 2.9h-2.4v7A10 10 0 0 0 22 12Z" />,
     ig: <g><rect {...p} x="3.2" y="3.2" width="17.6" height="17.6" rx="5" /><circle {...p} cx="12" cy="12" r="4.1" /><circle fill="currentColor" cx="17" cy="7" r="1.2" /></g>,
     quote: <path fill="currentColor" d="M9.2 6C6.3 7.4 4.6 9.9 4.6 13v5h6.2v-6.2H7.7c.1-1.6 1-2.9 2.6-3.9L9.2 6Zm9.6 0c-2.9 1.4-4.6 3.9-4.6 7v5h6.2v-6.2h-3.1c.1-1.6 1-2.9 2.6-3.9L18.8 6Z" />,
@@ -413,171 +449,47 @@ function Ico({ name, className = 'w-5 h-5', style }) {
   return <svg viewBox="0 0 24 24" className={className} style={style} aria-hidden="true">{paths[name] || paths.flame}</svg>;
 }
 
-/* ────────────────────────────────────────────────────────────
-   PRODUCT PLATE ART — schematic line drawings, one per product family
-   Replace with <Image/> when photography is ready; the API is the same.
-   ──────────────────────────────────────────────────────────── */
 
-const BURNER_LAYOUT = {
-  2: [[62, 62], [138, 62]],
-  3: [[58, 50], [142, 50], [100, 92]],
-  4: [[58, 46], [142, 46], [58, 94], [142, 94]],
-};
 
-function Burner({ x, y, r = 21 }) {
-  const ticks = Array.from({ length: 16 }, (_, i) => {
-    const a = (i / 16) * Math.PI * 2;
-    return [x + Math.cos(a) * (r - 8), y + Math.sin(a) * (r - 8), x + Math.cos(a) * (r - 4), y + Math.sin(a) * (r - 4)];
-  });
+function ProductImage({
+  src,
+  alt,
+  ratio = '4 / 3',
+  fit = 'contain',
+  zoom = false,
+  pad = true,
+  priority = false,
+  className = '',
+}) {
+  const [failed, setFailed] = useState(false);
+  useEffect(() => { setFailed(false); }, [src]);
+  const ok = src && !failed;
+
   return (
-    <g stroke="currentColor" fill="none" strokeWidth="1.1">
-      <circle cx={x} cy={y} r={r} opacity=".55" />
-      <circle cx={x} cy={y} r={r - 4} opacity=".8" />
-      <circle cx={x} cy={y} r={r - 12} opacity=".9" />
-      {ticks.map((t, i) => <line key={i} x1={t[0]} y1={t[1]} x2={t[2]} y2={t[3]} opacity=".65" />)}
-      <line x1={x - r - 7} y1={y} x2={x - r - 1} y2={y} opacity=".35" />
-      <line x1={x + r + 1} y1={y} x2={x + r + 7} y2={y} opacity=".35" />
-    </g>
+    <div
+      className={`kf-img ${zoom ? 'kf-zoom' : ''} ${ok && fit === 'contain' && pad ? 'kf-img-pad' : ''} ${className}`}
+      style={{ aspectRatio: ratio }}
+    >
+      {ok ? (
+        <img
+          key={src}
+          src={src}
+          alt={alt}
+          loading={priority ? 'eager' : 'lazy'}
+          decoding="async"
+          onError={() => setFailed(true)}
+          className="kf-fade"
+          style={{ objectFit: fit }}
+        />
+      ) : (
+        <div className="kf-img-wait">
+          <Ico name="image" className="w-6 h-6" />
+          <p className="kf-util text-[9px]">Photo goes here</p>
+          <p className="kf-img-path">{src || 'set an img path in GROUPS'}</p>
+        </div>
+      )}
+    </div>
   );
-}
-
-function Art({ icon = 'stove', burners = 3 }) {
-  const s = { fill: 'none', stroke: 'currentColor', strokeWidth: 1.2, strokeLinecap: 'round', strokeLinejoin: 'round' };
-  const pts = BURNER_LAYOUT[burners] || BURNER_LAYOUT[3];
-
-  if (icon === 'stove' || icon === 'glass' || icon === 'bahubali' || icon === 'hob') {
-    const heavy = icon === 'bahubali';
-    return (
-      <g>
-        <rect {...s} x="16" y="16" width="168" height="108" rx={icon === 'hob' ? 4 : 8} opacity=".9" strokeWidth={heavy ? 2 : 1.2} />
-        {heavy && <rect {...s} x="21" y="21" width="158" height="98" rx="6" opacity=".35" />}
-        {icon === 'glass' && <path {...s} d="M22 22h30M22 22v18" opacity=".45" />}
-        {pts.map((c, i) => <Burner key={i} x={c[0]} y={c[1]} r={heavy ? 24 : 21} />)}
-        {icon !== 'hob' && [0, 1, 2].map(i => (
-          <g key={i}>
-            <circle {...s} cx={62 + i * 38} cy={132} r="6" opacity=".7" />
-            <line {...s} x1={62 + i * 38} y1={132} x2={62 + i * 38} y2={127} opacity=".7" />
-          </g>
-        ))}
-      </g>
-    );
-  }
-  if (icon === 'cooker') {
-    return (
-      <g>
-        <path {...s} d="M50 44h100v58a10 10 0 0 1-10 10H60a10 10 0 0 1-10-10V44Z" />
-        <path {...s} d="M42 36h116v8H42z" />
-        <path {...s} d="M92 36V26h16v10" />
-        <circle {...s} cx="100" cy="22" r="6" />
-        <path {...s} d="M150 52h16v14h-16M50 52H34v14h16" opacity=".8" />
-        <path {...s} d="M62 60h76M62 74h58" opacity=".3" />
-      </g>
-    );
-  }
-  if (icon === 'kadai') {
-    return (
-      <g>
-        <path {...s} d="M46 50h108l-12 46a20 20 0 0 1-19 14H77a20 20 0 0 1-19-14L46 50Z" />
-        <path {...s} d="M46 50H26a8 8 0 0 0 0 16h13M154 50h20a8 8 0 0 1 0 16h-13" />
-        <path {...s} d="M62 68h76" opacity=".3" />
-      </g>
-    );
-  }
-  if (icon === 'triply') {
-    return (
-      <g>
-        <path {...s} d="M52 48h96v40a18 18 0 0 1-18 18H70a18 18 0 0 1-18-18V48Z" />
-        <path {...s} d="M148 54h34a6 6 0 0 1 0 12h-34" />
-        <path {...s} d="M64 106h72" opacity=".8" />
-        <path {...s} d="M66 112h68" opacity=".55" />
-        <path {...s} d="M68 118h64" opacity=".35" />
-        <text x="100" y="76" textAnchor="middle" fontSize="11" fill="currentColor" opacity=".45" fontFamily="Saira Condensed, sans-serif" letterSpacing="2">3 PLY</text>
-      </g>
-    );
-  }
-  if (icon === 'honeycomb') {
-    const hexes = [];
-    for (let r = 0; r < 4; r++) for (let c = 0; c < 6; c++) {
-      const x = 68 + c * 13 + (r % 2 ? 6.5 : 0), y = 46 + r * 11;
-      hexes.push(<path key={`${r}${c}`} {...s} strokeWidth=".9" opacity=".45" d={`M${x} ${y}l5.6 3.2v6.4L${x} ${y + 12.8}l-5.6-3.2v-6.4Z`} />);
-    }
-    return (
-      <g>
-        <circle {...s} cx="100" cy="70" r="52" />
-        <circle {...s} cx="100" cy="70" r="45" opacity=".4" />
-        <path {...s} d="M152 70h30a5 5 0 0 1 0 10h-28" />
-        <g clipPath="url(#kfHex)">{hexes}</g>
-        <clipPath id="kfHex"><circle cx="100" cy="70" r="43" /></clipPath>
-      </g>
-    );
-  }
-  if (icon === 'induction') {
-    return (
-      <g>
-        <rect {...s} x="26" y="30" width="148" height="84" rx="4" />
-        <circle {...s} cx="88" cy="68" r="34" opacity=".7" />
-        <circle {...s} cx="88" cy="68" r="24" opacity=".5" />
-        <circle {...s} cx="88" cy="68" r="14" opacity=".35" />
-        <rect {...s} x="140" y="46" width="22" height="6" rx="3" opacity=".7" />
-        <rect {...s} x="140" y="60" width="22" height="6" rx="3" opacity=".5" />
-        <rect {...s} x="140" y="74" width="22" height="6" rx="3" opacity=".35" />
-      </g>
-    );
-  }
-  if (icon === 'mixer') {
-    return (
-      <g>
-        <path {...s} d="M62 118h76l-6-26H68l-6 26Z" />
-        <path {...s} d="M70 92V58a8 8 0 0 1 8-8h44a8 8 0 0 1 8 8v34" />
-        <path {...s} d="M78 50V34h44v16" />
-        <path {...s} d="M130 66h14M130 78h14" opacity=".5" />
-        <circle {...s} cx="100" cy="106" r="6" opacity=".7" />
-      </g>
-    );
-  }
-  if (icon === 'kettle') {
-    return (
-      <g>
-        <path {...s} d="M66 46h68l8 58a12 12 0 0 1-12 14H70a12 12 0 0 1-12-14l8-58Z" />
-        <path {...s} d="M134 54c18 2 26 12 26 24s-10 20-22 20" />
-        <path {...s} d="M78 46V36h44v10" />
-        <path {...s} d="M78 82h44" opacity=".35" />
-        <rect {...s} x="52" y="118" width="96" height="8" rx="4" opacity=".7" />
-      </g>
-    );
-  }
-  if (icon === 'iron') {
-    return (
-      <g>
-        <path {...s} d="M34 104h132l-8-14H42l-8 14Z" />
-        <path {...s} d="M46 90V72c0-14 12-24 30-24h56c14 0 24 8 24 18v24" />
-        <path {...s} d="M66 48c0-8 6-14 16-14h30" />
-        <circle {...s} cx="142" cy="76" r="8" opacity=".6" />
-        <path {...s} d="M60 66h40" opacity=".35" />
-      </g>
-    );
-  }
-  if (icon === 'lighter') {
-    return (
-      <g>
-        <path {...s} d="M52 74h48v34a8 8 0 0 1-8 8H60a8 8 0 0 1-8-8V74Z" />
-        <path {...s} d="M100 84h56l14-10" />
-        <path {...s} d="M62 74V60h20v14" />
-        <path {...s} d="M170 74s10 6 10 13a10 10 0 0 1-20 0c0-7 10-13 10-13Z" className="kf-flick" />
-        <path {...s} d="M62 92h26" opacity=".35" />
-      </g>
-    );
-  }
-  if (icon === 'hose') {
-    return (
-      <g>
-        <path {...s} d="M30 44h22v20H30zM148 76h22v20h-22z" />
-        <path {...s} d="M52 54c40 0 30 32 0 32s-40 32 0 32h96" />
-        <path {...s} d="M52 54h96c30 0 30 32 0 32H52" opacity=".55" />
-      </g>
-    );
-  }
-  return <circle {...s} cx="100" cy="70" r="44" />;
 }
 
 /* ────────────────────────────────────────────────────────────
@@ -630,10 +542,7 @@ function PortRule() {
   return (
     <div className="relative flex items-center justify-center py-1" aria-hidden="true">
       <div className="kf-ports" />
-      <span
-        className="absolute rounded-full"
-        style={{ width: 13, height: 13, border: '1px solid var(--gold)', background: 'var(--ink)' }}
-      />
+      <span className="absolute rounded-full" style={{ width: 13, height: 13, border: '1px solid var(--gold)', background: 'var(--ink)' }} />
       <span className="absolute rounded-full" style={{ width: 4, height: 4, background: 'var(--gold)' }} />
     </div>
   );
@@ -646,8 +555,7 @@ function Counter({ to, suffix = '', plain = false }) {
     if (plain) return;
     const el = ref.current;
     if (!el) return;
-    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (reduce) { setN(to); return; }
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { setN(to); return; }
     let raf, started = false;
     const io = new IntersectionObserver(([e]) => {
       if (!e.isIntersecting || started) return;
@@ -667,21 +575,24 @@ function Counter({ to, suffix = '', plain = false }) {
   return <span ref={ref}>{n}{suffix}</span>;
 }
 
-function Logo({ className = '', compact = false }) {
+/* Logo — your image file. Falls back to the wordmark in type if the file is missing,
+   so the header never renders empty while you are still uploading. */
+function Logo({ className = '', height = 48, maxWidth = 200 }) {
+  const [failed, setFailed] = useState(false);
   return (
-    <a href="#top" className={`flex items-center gap-3 ${className}`} aria-label={`${BRAND.name} — home`}>
-      <svg viewBox="0 0 40 46" className={compact ? 'w-7 h-8' : 'w-9 h-10'} aria-hidden="true">
-        <path
-          d="M3.2 5.4c11-3.6 22.6-3.6 33.6 0l-2.6 20.1c-1 7.6-8.1 13.7-14.6 17.7-6.5-4-13.6-10.1-14.6-17.7L3.2 5.4Z"
-          fill="none" stroke="var(--gold)" strokeWidth="4.2" strokeLinejoin="round"
+    <a href="#top" className={`inline-flex items-center ${className}`} aria-label={`${BRAND.name} — home`}>
+      {!failed ? (
+        <img
+          src={IMG.logo}
+          alt={`${BRAND.name} — ${BRAND.tagline}`}
+          onError={() => setFailed(true)}
+          style={{ height, width: 'auto', maxWidth, objectFit: 'contain', display: 'block' }}
         />
-      </svg>
-      <span className="leading-none">
-        <span className={`kf-display block font-extrabold tracking-tight ${compact ? 'text-lg' : 'text-xl'}`}>
+      ) : (
+        <span className="kf-display text-xl font-extrabold tracking-tight">
           KNIGHT<span className="kf-gold">FLAME</span>
         </span>
-        {!compact && <span className="kf-util block text-[9px] mt-1" style={{ color: 'var(--mute)' }}>Since 2010</span>}
-      </span>
+      )}
     </a>
   );
 }
@@ -732,13 +643,13 @@ function Nav() {
       <nav
         className="transition-all duration-300"
         style={{
-          background: solid ? 'rgba(11,11,12,.86)' : 'transparent',
+          background: solid ? 'rgba(11,11,12,.88)' : 'transparent',
           backdropFilter: solid ? 'blur(14px)' : 'none',
           borderBottom: `1px solid ${solid ? 'var(--steel)' : 'transparent'}`,
         }}
       >
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <Logo />
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-3">
+          <Logo height={52} maxWidth={200} />
           <ul className="hidden lg:flex items-center gap-8">
             {NAV.map(i => (
               <li key={i.href}>
@@ -750,12 +661,7 @@ function Nav() {
           </ul>
           <div className="flex items-center gap-3">
             <a href="#contact" className="kf-btn kf-btn-gold kf-cta-desk">Get a quote</a>
-            <button
-              onClick={() => setOpen(true)}
-              className="lg:hidden p-2"
-              style={{ border: '1px solid var(--steel)' }}
-              aria-label="Open menu"
-            >
+            <button onClick={() => setOpen(true)} className="lg:hidden p-2" style={{ border: '1px solid var(--steel)' }} aria-label="Open menu">
               <Ico name="menu" className="w-5 h-5" />
             </button>
           </div>
@@ -763,9 +669,9 @@ function Nav() {
       </nav>
 
       {open && (
-        <div className="fixed inset-0 z-50 lg:hidden" style={{ background: 'var(--ink)' }}>
-          <div className="flex items-center justify-between px-6 py-4" style={{ borderBottom: '1px solid var(--steel)' }}>
-            <Logo />
+        <div className="fixed inset-0 z-50 lg:hidden overflow-y-auto" style={{ background: 'var(--ink)' }}>
+          <div className="flex items-center justify-between px-6 py-3" style={{ borderBottom: '1px solid var(--steel)' }}>
+            <Logo height={44} maxWidth={170} />
             <button onClick={() => setOpen(false)} className="p-2" style={{ border: '1px solid var(--steel)' }} aria-label="Close menu">
               <Ico name="close" className="w-5 h-5" />
             </button>
@@ -780,7 +686,7 @@ function Nav() {
               </li>
             ))}
           </ul>
-          <div className="px-6 pt-4">
+          <div className="px-6 pt-4 pb-10">
             <a href="#contact" onClick={() => setOpen(false)} className="kf-btn kf-btn-gold w-full">Get a quote</a>
             <div className="mt-8 flex items-center justify-between">
               <p className="kf-util text-[10px]" style={{ color: 'var(--mute)' }}>{BRAND.tagline}</p>
@@ -794,15 +700,12 @@ function Nav() {
 }
 
 /* ────────────────────────────────────────────────────────────
-   2 · HERO — the signature: a live burner head
+   2 · HERO — the one illustrated element: a live brass burner
    ──────────────────────────────────────────────────────────── */
 
 function BurnerHead() {
   const PORTS = 30;
-  const ports = Array.from({ length: PORTS }, (_, i) => {
-    const a = (i / PORTS) * 360;
-    return { a, d: (i % 7) * 0.21 };
-  });
+  const ports = Array.from({ length: PORTS }, (_, i) => ({ a: (i / PORTS) * 360, d: (i % 7) * 0.21 }));
   return (
     <svg viewBox="0 0 520 520" className="w-full h-auto" role="img" aria-label="Knight Flame brass burner, illustrated">
       <defs>
@@ -860,14 +763,8 @@ function BurnerHead() {
       <circle cx="260" cy="260" r="104" fill="none" stroke="#D3A75F" strokeWidth="1.4" opacity=".7" />
       <g>
         {ports.map((p, i) => (
-          <rect
-            key={`p${i}`}
-            x="257.5" y="146" width="5" height="16" rx="2.5"
-            fill="#D3A75F"
-            transform={`rotate(${p.a} 260 260)`}
-            className="kf-flick"
-            style={{ animationDelay: `${p.d}s` }}
-          />
+          <rect key={`p${i}`} x="257.5" y="146" width="5" height="16" rx="2.5" fill="#D3A75F"
+                transform={`rotate(${p.a} 260 260)`} className="kf-flick" style={{ animationDelay: `${p.d}s` }} />
         ))}
       </g>
       <circle cx="260" cy="260" r="82" fill="#101216" stroke="#8E6C2E" strokeWidth="1.2" />
@@ -882,10 +779,8 @@ function BurnerHead() {
 function Hero() {
   return (
     <section id="top" className="relative overflow-hidden">
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{ backgroundImage: 'radial-gradient(circle at 78% 34%, rgba(46,125,209,.10), transparent 46%)' }}
-      />
+      <div className="pointer-events-none absolute inset-0"
+           style={{ backgroundImage: 'radial-gradient(circle at 78% 34%, rgba(46,125,209,.10), transparent 46%)' }} />
       <div className="relative mx-auto grid max-w-7xl items-center gap-14 px-6 pb-20 pt-14 lg:grid-cols-12 lg:gap-8 lg:pb-28 lg:pt-20">
         <div className="lg:col-span-6 xl:col-span-7">
           <Reveal><Eyebrow>Est. 2010 · Gas stoves · Cookers · Cookware</Eyebrow></Reveal>
@@ -927,10 +822,7 @@ function Hero() {
           <Reveal delay={120}>
             <figure className="relative mx-auto m-0" style={{ maxWidth: 520 }}>
               <BurnerHead />
-              <figcaption
-                className="kf-util mt-4 flex items-center justify-center gap-3 text-[10px]"
-                style={{ color: 'var(--mute)' }}
-              >
+              <figcaption className="kf-util mt-4 flex items-center justify-center gap-3 text-[10px]" style={{ color: 'var(--mute)' }}>
                 <span className="inline-block w-6" style={{ height: 1, background: 'var(--steel)' }} />
                 <span className="kf-gold">30</span> ports · machined brass
                 <span className="inline-block w-6" style={{ height: 1, background: 'var(--steel)' }} />
@@ -950,14 +842,13 @@ function Hero() {
 function Ticker() {
   const row = [...TICKER, ...TICKER];
   return (
-    <section
-      className="kf-marquee overflow-hidden py-5"
-      style={{ background: '#0E1013', borderTop: '1px solid var(--steel)', borderBottom: '1px solid var(--steel)' }}
-      aria-label="What every Knight Flame product ships with"
-    >
+    <section className="kf-marquee overflow-hidden py-5"
+             style={{ background: '#0E1013', borderTop: '1px solid var(--steel)', borderBottom: '1px solid var(--steel)' }}
+             aria-label="What every Knight Flame product ships with">
       <div className="kf-run">
         {row.map((t, i) => (
-          <span key={i} className="kf-util flex items-center gap-6 whitespace-nowrap px-6 text-[11px]" style={{ color: i % 2 ? 'var(--mute)' : 'var(--cream)' }}>
+          <span key={i} className="kf-util flex items-center gap-6 whitespace-nowrap px-6 text-[11px]"
+                style={{ color: i % 2 ? 'var(--mute)' : 'var(--cream)' }}>
             {t}
             <span className="inline-block rounded-full" style={{ width: 4, height: 4, background: 'var(--gold)' }} />
           </span>
@@ -968,13 +859,25 @@ function Ticker() {
 }
 
 /* ────────────────────────────────────────────────────────────
-   4 · COOKING RANGE — tabbed catalogue of stoves & hobtops
+   4 · COOKING RANGE — tabbed catalogue. Tapping a burner count
+   swaps the photograph, so shoot 2 / 3 / 4 burner separately.
    ──────────────────────────────────────────────────────────── */
+
+/* "2 Burner","3 Burner","4 Burner" → "2 · 3 · 4 Burner" so the tab label stays on one line */
+function sizeSummary(variants) {
+  const unit = variants[0].split(' ').slice(1).join(' ');
+  return `${variants.map(v => v.split(' ')[0]).join(' · ')} ${unit}`.trim();
+}
 
 function CookingRange() {
   const items = GROUPS[0].items;
   const [active, setActive] = useState(0);
+  const [vIndex, setVIndex] = useState(0);
   const item = items[active];
+  const variant = item.variants[vIndex] || item.variants[0];
+  const photo = (item.imgByVariant && item.imgByVariant[variant]) || item.img;
+
+  const pick = (i) => { setActive(i); setVIndex(0); };
 
   return (
     <section id="catalogue" className="mx-auto max-w-7xl px-6 py-24 lg:py-32">
@@ -989,19 +892,16 @@ function CookingRange() {
 
       <div className="mt-14 grid gap-8 lg:grid-cols-12">
         {/* selector */}
-        <div className="lg:col-span-4">
-          <div className="flex gap-3 overflow-x-auto pb-2 lg:flex-col lg:overflow-visible lg:pb-0">
+        <div className="min-w-0 lg:col-span-3">
+          <div className="flex w-full gap-3 overflow-x-auto pb-2 lg:flex-col lg:overflow-visible lg:pb-0">
             {items.map((it, i) => {
               const on = i === active;
               return (
                 <button
                   key={it.id}
-                  onClick={() => setActive(i)}
-                  className="group flex min-w-max items-center justify-between gap-5 px-5 py-5 text-left transition-all lg:min-w-0 lg:w-full"
-                  style={{
-                    background: on ? 'var(--panel2)' : 'transparent',
-                    borderLeft: `2px solid ${on ? 'var(--gold)' : 'var(--steel)'}`,
-                  }}
+                  onClick={() => pick(i)}
+                  className="group flex min-w-max items-center justify-between gap-3 px-4 py-4 text-left transition-all lg:min-w-0 lg:w-full"
+                  style={{ background: on ? 'var(--panel2)' : 'transparent', borderLeft: `2px solid ${on ? 'var(--gold)' : 'var(--steel)'}` }}
                   aria-pressed={on}
                 >
                   <span>
@@ -1009,7 +909,7 @@ function CookingRange() {
                       {it.name}
                     </span>
                     <span className="kf-util mt-1.5 block text-[10px]" style={{ color: on ? 'var(--gold)' : '#5D626B' }}>
-                      {it.variants.join(' · ')}
+                      {sizeSummary(it.variants)}
                     </span>
                   </span>
                   <Ico name="arrow" className={`w-4 h-4 shrink-0 transition-opacity ${on ? 'opacity-100 kf-gold' : 'opacity-0'}`} />
@@ -1029,24 +929,30 @@ function CookingRange() {
         </div>
 
         {/* detail */}
-        <div className="lg:col-span-8">
-          <div key={item.id} className="kf-rv is-in kf-plate p-6 sm:p-10">
+        <div className="min-w-0 lg:col-span-9">
+          <div className="kf-plate p-5 sm:p-7">
             <span className="kf-plate-in" />
-            <div className="relative grid gap-8 sm:grid-cols-2 sm:items-center">
-              <div className="flex justify-center" style={{ color: 'var(--gold)' }}>
-                <svg viewBox="0 0 200 145" className="w-full" style={{ maxWidth: 340 }} aria-hidden="true">
-                  <Art icon={item.icon} burners={item.burners} />
-                </svg>
-              </div>
-              <div>
+            <div className="relative grid gap-6 sm:grid-cols-12 sm:items-center lg:gap-8">
+              {/* The frame's ratio should match your photo's ratio. object-fit is
+                  `contain`, so a landscape photo in a portrait frame gets letterboxed
+                  and looks smaller. Landscape shots → "4 / 3". Portrait → "3 / 4". */}
+              <ProductImage
+                src={photo}
+                alt={`${item.name} — ${variant}`}
+                ratio="4 / 3"
+                className="kf-pad-tight sm:col-span-7"
+                priority
+              />
+              <div className="sm:col-span-5">
                 <h3 className="kf-display text-3xl font-bold">{item.name}</h3>
                 <p className="kf-mute mt-4 text-sm leading-relaxed">{item.blurb}</p>
 
-                <div className="mt-6 flex flex-wrap gap-2">
-                  {item.variants.map(v => (
-                    <span key={v} className="kf-util px-3 py-1.5 text-[10px]" style={{ border: '1px solid var(--steel)', color: 'var(--cream)' }}>
+                <p className="kf-util mt-7 text-[10px]" style={{ color: 'var(--mute)' }}>Choose size</p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {item.variants.map((v, i) => (
+                    <button key={v} className="kf-chip" aria-pressed={i === vIndex} onClick={() => setVIndex(i)}>
                       {v}
-                    </span>
+                    </button>
                   ))}
                 </div>
 
@@ -1080,15 +986,18 @@ function Bahubali() {
     ['Reinforced frame', 'Thicker gauge steel under the top so the stove does not flex under load.'],
   ];
   return (
-    <section id="bahubali" className="relative overflow-hidden" style={{ background: '#0E1013', borderTop: '1px solid var(--steel)', borderBottom: '1px solid var(--steel)' }}>
-      <div className="pointer-events-none absolute inset-0" style={{ backgroundImage: 'radial-gradient(circle at 22% 50%, rgba(211,167,95,.10), transparent 55%)' }} />
+    <section id="bahubali" className="relative overflow-hidden"
+             style={{ background: '#0E1013', borderTop: '1px solid var(--steel)', borderBottom: '1px solid var(--steel)' }}>
+      <div className="pointer-events-none absolute inset-0"
+           style={{ backgroundImage: 'radial-gradient(circle at 22% 50%, rgba(211,167,95,.10), transparent 55%)' }} />
       <div className="relative mx-auto grid max-w-7xl items-center gap-14 px-6 py-24 lg:grid-cols-2 lg:py-32">
         <Reveal>
-          <div style={{ color: 'var(--gold)' }}>
-            <svg viewBox="0 0 200 150" className="w-full" aria-label="Bahubali four burner gas stove, illustrated" role="img">
-              <Art icon="bahubali" burners={4} />
-            </svg>
-          </div>
+          <ProductImage
+            src={IMG.bahubali}
+            alt="Knight Flame Bahubali four burner heavy-duty gas stove"
+            ratio="4 / 3"
+            pad={false}
+          />
         </Reveal>
 
         <Reveal delay={100}>
@@ -1148,11 +1057,9 @@ function Compare() {
             <thead>
               <tr>
                 {COMPARE.head.map((h, i) => (
-                  <th
-                    key={h || i}
-                    className={`kf-util px-5 py-5 text-[11px] ${i === 0 ? '' : 'kf-gold'}`}
-                    style={{ borderBottom: '1px solid var(--gold)', color: i === 0 ? 'var(--mute)' : undefined, minWidth: i === 0 ? 130 : 190 }}
-                  >
+                  <th key={h || i}
+                      className={`kf-util px-5 py-5 text-[11px] ${i === 0 ? '' : 'kf-gold'}`}
+                      style={{ borderBottom: '1px solid var(--gold)', color: i === 0 ? 'var(--mute)' : undefined, minWidth: i === 0 ? 130 : 190 }}>
                     {h || 'Specification'}
                   </th>
                 ))}
@@ -1162,11 +1069,9 @@ function Compare() {
               {COMPARE.rows.map((r, ri) => (
                 <tr key={r[0]} style={{ background: ri % 2 ? 'transparent' : '#0F1114' }}>
                   {r.map((c, ci) => (
-                    <td
-                      key={ci}
-                      className={ci === 0 ? 'kf-util px-5 py-5 text-[10px]' : 'px-5 py-5 text-sm'}
-                      style={{ borderBottom: '1px solid var(--steel)', color: ci === 0 ? 'var(--mute)' : 'var(--cream)' }}
-                    >
+                    <td key={ci}
+                        className={ci === 0 ? 'kf-util px-5 py-5 text-[10px]' : 'px-5 py-5 text-sm'}
+                        style={{ borderBottom: '1px solid var(--steel)', color: ci === 0 ? 'var(--mute)' : 'var(--cream)' }}>
                       {c}
                     </td>
                   ))}
@@ -1206,20 +1111,13 @@ function Cookers() {
           <button
             onClick={() => setInductionOnly(v => !v)}
             className="kf-util flex items-center gap-3 px-5 py-3 text-[10px] transition-colors"
-            style={{
-              border: `1px solid ${inductionOnly ? 'var(--gold)' : 'var(--steel)'}`,
-              color: inductionOnly ? 'var(--gold)' : 'var(--mute)',
-            }}
+            style={{ border: `1px solid ${inductionOnly ? 'var(--gold)' : 'var(--steel)'}`, color: inductionOnly ? 'var(--gold)' : 'var(--mute)' }}
             aria-pressed={inductionOnly}
           >
-            <span
-              className="inline-flex items-center rounded-full p-0.5 transition-colors"
-              style={{ width: 34, height: 18, background: inductionOnly ? 'var(--gold)' : 'var(--steel)' }}
-            >
-              <span
-                className="rounded-full transition-transform"
-                style={{ width: 14, height: 14, background: inductionOnly ? '#0B0B0C' : '#8B8F97', transform: `translateX(${inductionOnly ? 16 : 0}px)` }}
-              />
+            <span className="inline-flex items-center rounded-full p-0.5 transition-colors"
+                  style={{ width: 34, height: 18, background: inductionOnly ? 'var(--gold)' : 'var(--steel)' }}>
+              <span className="rounded-full transition-transform"
+                    style={{ width: 14, height: 14, background: inductionOnly ? '#0B0B0C' : '#8B8F97', transform: `translateX(${inductionOnly ? 16 : 0}px)` }} />
             </span>
             Induction-ready only
           </button>
@@ -1231,13 +1129,8 @@ function Cookers() {
           <Reveal key={it.id} delay={i * 70}>
             <article className="kf-plate flex h-full flex-col">
               <span className="kf-plate-in" />
-              <div className="relative flex justify-center py-8" style={{ color: 'var(--gold)' }}>
-                <div className="absolute rounded-full kf-breathe" style={{ width: 170, height: 120, background: 'radial-gradient(circle, rgba(211,167,95,.16), transparent 68%)' }} />
-                <svg viewBox="0 0 200 140" className="relative w-full" style={{ maxWidth: 220 }} aria-hidden="true">
-                  <Art icon="cooker" />
-                </svg>
-              </div>
-              <div className="relative flex flex-1 flex-col px-6 pb-6">
+              <ProductImage src={it.img} alt={it.name} ratio="1 / 1" zoom />
+              <div className="relative flex flex-1 flex-col px-6 pb-6 pt-5">
                 <span className="kf-util text-[9px]" style={{ color: isInduction(it) ? 'var(--gold)' : '#4E535B' }}>
                   {isInduction(it) ? 'Gas + induction' : 'Gas only'}
                 </span>
@@ -1277,30 +1170,27 @@ function Cookware() {
         <div className="mt-14 grid gap-6 md:grid-cols-3">
           {GROUPS[2].items.map((it, i) => (
             <Reveal key={it.id} delay={i * 90}>
-              <article className="kf-plate flex h-full flex-col p-7">
+              <article className="kf-plate flex h-full flex-col">
                 <span className="kf-plate-in" />
-                <div className="relative flex justify-center py-6" style={{ color: 'var(--gold)' }}>
-                  <div className="absolute rounded-full kf-breathe" style={{ width: 180, height: 130, background: 'radial-gradient(circle, rgba(211,167,95,.16), transparent 68%)' }} />
-                  <svg viewBox="0 0 200 140" className="relative w-full" style={{ maxWidth: 260 }} aria-hidden="true">
-                    <Art icon={it.icon} />
-                  </svg>
-                </div>
-                <h3 className="kf-display mt-4 text-2xl font-bold">{it.name}</h3>
-                <p className="kf-mute mt-3 flex-1 text-sm leading-relaxed">{it.blurb}</p>
+                <ProductImage src={it.img} alt={it.name} ratio="4 / 3" zoom />
+                <div className="relative flex flex-1 flex-col px-7 pb-7 pt-6">
+                  <h3 className="kf-display text-2xl font-bold">{it.name}</h3>
+                  <p className="kf-mute mt-3 flex-1 text-sm leading-relaxed">{it.blurb}</p>
 
-                <ul className="mt-6">
-                  {it.specs.map(([k, v]) => (
-                    <li key={k} className="flex items-center justify-between py-2.5 text-sm" style={{ borderTop: '1px solid var(--steel)' }}>
-                      <span className="kf-util text-[10px]" style={{ color: 'var(--mute)' }}>{k}</span>
-                      <span>{v}</span>
-                    </li>
-                  ))}
-                </ul>
+                  <ul className="mt-6">
+                    {it.specs.map(([k, v]) => (
+                      <li key={k} className="flex items-center justify-between py-2.5 text-sm" style={{ borderTop: '1px solid var(--steel)' }}>
+                        <span className="kf-util text-[10px]" style={{ color: 'var(--mute)' }}>{k}</span>
+                        <span>{v}</span>
+                      </li>
+                    ))}
+                  </ul>
 
-                <div className="mt-5 flex flex-wrap gap-2">
-                  {it.variants.map(v => (
-                    <span key={v} className="kf-util px-2.5 py-1 text-[9px]" style={{ border: '1px solid var(--steel)', color: 'var(--cream)' }}>{v}</span>
-                  ))}
+                  <div className="mt-5 flex flex-wrap gap-2">
+                    {it.variants.map(v => (
+                      <span key={v} className="kf-util px-2.5 py-1 text-[9px]" style={{ border: '1px solid var(--steel)', color: 'var(--cream)' }}>{v}</span>
+                    ))}
+                  </div>
                 </div>
               </article>
             </Reveal>
@@ -1327,25 +1217,23 @@ function Appliances() {
         />
       </Reveal>
 
-      <div className="mt-14 grid gap-px sm:grid-cols-2 lg:grid-cols-3" style={{ background: 'var(--steel)', border: '1px solid var(--steel)' }}>
+      <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {GROUPS[3].items.map((it, i) => (
-          <article key={it.id} className="group relative p-8 transition-colors" style={{ background: 'var(--ink)' }}>
-            <Reveal delay={(i % 3) * 70}>
-              <div className="flex items-start justify-between gap-6">
-                <div style={{ color: 'var(--gold)' }}>
-                  <svg viewBox="0 0 200 140" className="w-24 h-auto" aria-hidden="true"><Art icon={it.icon} /></svg>
+          <Reveal key={it.id} delay={(i % 3) * 70}>
+            <article className="kf-plate flex h-full flex-col">
+              <span className="kf-plate-in" />
+              <ProductImage src={it.img} alt={it.name} ratio="4 / 3" zoom />
+              <div className="relative flex flex-1 flex-col px-6 pb-6 pt-5">
+                <h3 className="kf-display text-xl font-semibold">{it.name}</h3>
+                <p className="kf-mute mt-3 flex-1 text-sm leading-relaxed">{it.blurb}</p>
+                <div className="mt-5 flex flex-wrap gap-2">
+                  {it.variants.map(v => (
+                    <span key={v} className="kf-util px-2.5 py-1 text-[9px]" style={{ border: '1px solid var(--steel)', color: 'var(--mute)' }}>{v}</span>
+                  ))}
                 </div>
-                <span className="kf-util text-[10px]" style={{ color: '#4E535B' }}>{String(i + 1).padStart(2, '0')}</span>
               </div>
-              <h3 className="kf-display mt-6 text-xl font-semibold">{it.name}</h3>
-              <p className="kf-mute mt-3 text-sm leading-relaxed">{it.blurb}</p>
-              <div className="mt-5 flex flex-wrap gap-2">
-                {it.variants.map(v => (
-                  <span key={v} className="kf-util px-2.5 py-1 text-[9px]" style={{ border: '1px solid var(--steel)', color: 'var(--mute)' }}>{v}</span>
-                ))}
-              </div>
-            </Reveal>
-          </article>
+            </article>
+          </Reveal>
         ))}
       </div>
     </section>
@@ -1390,7 +1278,8 @@ function Why() {
 }
 
 /* ────────────────────────────────────────────────────────────
-   11 · HOW IT IS MADE — a real sequence, so it is numbered
+   11 · HOW IT IS MADE — a real sequence, so it is numbered.
+   Each stage takes a photograph from the factory floor.
    ──────────────────────────────────────────────────────────── */
 
 function Process() {
@@ -1405,25 +1294,23 @@ function Process() {
         />
       </Reveal>
 
-      <div className="relative mt-16">
-        <div className="absolute left-0 right-0 hidden lg:block" style={{ top: 22, height: 1, background: 'var(--steel)' }} />
-        <ol className="grid gap-10 sm:grid-cols-2 lg:grid-cols-5 lg:gap-6">
-          {PROCESS.map((s, i) => (
-            <Reveal key={s.n} delay={i * 90} as="li" className="relative">
-              <div className="flex items-center gap-4 lg:block">
-                <span
-                  className="kf-display relative z-10 flex items-center justify-center text-sm font-bold"
-                  style={{ width: 44, height: 44, borderRadius: '50%', background: 'var(--ink)', border: '1px solid var(--gold)', color: 'var(--gold)' }}
-                >
-                  {s.n}
-                </span>
-                <h3 className="kf-display text-xl font-semibold lg:mt-6">{s.title}</h3>
-              </div>
-              <p className="kf-mute mt-3 text-sm leading-relaxed">{s.body}</p>
-            </Reveal>
-          ))}
-        </ol>
-      </div>
+      <ol className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-5 lg:gap-5">
+        {PROCESS.map((s, i) => (
+          <Reveal key={s.n} delay={i * 90} as="li">
+            <div className="relative">
+              <ProductImage src={s.img} alt={`Knight Flame factory — ${s.title}`} ratio="4 / 3" fit="cover" pad={false} zoom />
+              <span
+                className="kf-display absolute flex items-center justify-center text-sm font-bold"
+                style={{ left: 12, top: 12, zIndex: 2, width: 40, height: 40, borderRadius: '50%', background: 'rgba(11,11,12,.82)', border: '1px solid var(--gold)', color: 'var(--gold)' }}
+              >
+                {s.n}
+              </span>
+            </div>
+            <h3 className="kf-display mt-5 text-xl font-semibold">{s.title}</h3>
+            <p className="kf-mute mt-2.5 text-sm leading-relaxed">{s.body}</p>
+          </Reveal>
+        ))}
+      </ol>
     </section>
   );
 }
@@ -1434,10 +1321,8 @@ function Process() {
 
 function Stats() {
   return (
-    <section
-      aria-label="Knight Flame in numbers"
-      style={{ background: '#0E1013', borderTop: '1px solid var(--steel)', borderBottom: '1px solid var(--steel)' }}
-    >
+    <section aria-label="Knight Flame in numbers"
+             style={{ background: '#0E1013', borderTop: '1px solid var(--steel)', borderBottom: '1px solid var(--steel)' }}>
       <div className="mx-auto grid max-w-7xl grid-cols-2 gap-px px-6 py-16 lg:grid-cols-4 lg:py-20">
         {/* TODO: confirm SKU and dealer figures with the sales team before launch */}
         {STATS.map((s, i) => (
@@ -1456,8 +1341,27 @@ function Stats() {
 }
 
 /* ────────────────────────────────────────────────────────────
-   13 · WHAT PEOPLE SAY
+   13 · WHAT PEOPLE SAY — photo per person, initials if none yet
    ──────────────────────────────────────────────────────────── */
+
+function Avatar({ src, name, size = 48 }) {
+  const [failed, setFailed] = useState(false);
+  useEffect(() => { setFailed(false); }, [src]);
+  const initials = name.split(' ').map(w => w[0]).join('');
+  return (
+    <span
+      className="flex shrink-0 items-center justify-center overflow-hidden"
+      style={{ width: size, height: size, borderRadius: '50%', background: 'var(--panel2)', border: '1px solid var(--steel)' }}
+    >
+      {src && !failed ? (
+        <img src={src} alt={name} loading="lazy" decoding="async" onError={() => setFailed(true)}
+             style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+      ) : (
+        <span className="kf-display text-sm font-bold" style={{ color: 'var(--gold)' }}>{initials}</span>
+      )}
+    </span>
+  );
+}
 
 function Reviews() {
   const [i, setI] = useState(0);
@@ -1502,16 +1406,9 @@ function Reviews() {
               <span className="kf-plate-in" />
               <div className="relative">
                 <span className="kf-gold inline-block" style={{ opacity: .45 }}><Ico name="quote" className="w-10 h-10" /></span>
-                <p className="kf-display mt-6 text-2xl font-medium leading-snug sm:text-3xl" style={{ lineHeight: 1.28 }}>
-                  {r.quote}
-                </p>
+                <p className="kf-display mt-6 text-2xl font-medium sm:text-3xl" style={{ lineHeight: 1.28 }}>{r.quote}</p>
                 <footer className="mt-8 flex items-center gap-4" style={{ borderTop: '1px solid var(--steel)', paddingTop: '1.5rem' }}>
-                  <span
-                    className="kf-display flex items-center justify-center text-sm font-bold"
-                    style={{ width: 44, height: 44, background: 'var(--panel2)', border: '1px solid var(--steel)', color: 'var(--gold)' }}
-                  >
-                    {r.name.split(' ').map(w => w[0]).join('')}
-                  </span>
+                  <Avatar src={r.img} name={r.name} />
                   <span>
                     <cite className="kf-display block not-italic text-base font-semibold">{r.name}</cite>
                     <span className="kf-util mt-1 block text-[10px]" style={{ color: 'var(--mute)' }}>{r.role}</span>
@@ -1523,13 +1420,9 @@ function Reviews() {
 
           <div className="mt-6 flex gap-2">
             {REVIEWS.map((_, k) => (
-              <button
-                key={k}
-                onClick={() => setI(k)}
-                aria-label={`Show review ${k + 1}`}
-                className="flex-1 transition-colors"
-                style={{ height: 2, background: k === i ? 'var(--gold)' : 'var(--steel)' }}
-              />
+              <button key={k} onClick={() => setI(k)} aria-label={`Show review ${k + 1}`}
+                      className="flex-1 transition-colors"
+                      style={{ height: 2, background: k === i ? 'var(--gold)' : 'var(--steel)' }} />
             ))}
           </div>
         </div>
@@ -1566,8 +1459,10 @@ function Dealers() {
   ];
 
   return (
-    <section id="dealers" className="relative overflow-hidden" style={{ background: '#0E1013', borderTop: '1px solid var(--steel)', borderBottom: '1px solid var(--steel)' }}>
-      <div className="pointer-events-none absolute inset-0" style={{ backgroundImage: 'radial-gradient(circle at 85% 20%, rgba(211,167,95,.09), transparent 50%)' }} />
+    <section id="dealers" className="relative overflow-hidden"
+             style={{ background: '#0E1013', borderTop: '1px solid var(--steel)', borderBottom: '1px solid var(--steel)' }}>
+      <div className="pointer-events-none absolute inset-0"
+           style={{ backgroundImage: 'radial-gradient(circle at 85% 20%, rgba(211,167,95,.09), transparent 50%)' }} />
       <div className="relative mx-auto grid max-w-7xl gap-14 px-6 py-24 lg:grid-cols-2 lg:gap-20 lg:py-32">
         <Reveal>
           <Eyebrow>Distribution</Eyebrow>
@@ -1605,7 +1500,8 @@ function Dealers() {
                     Our territory manager for {form.city || 'your region'} will call {form.phone} within two working days
                     with the price list and margin structure.
                   </p>
-                  <button onClick={() => { setSent(false); setForm({ name: '', firm: '', city: '', phone: '', brands: '' }); }} className="kf-btn kf-btn-ghost mt-8">
+                  <button onClick={() => { setSent(false); setForm({ name: '', firm: '', city: '', phone: '', brands: '' }); }}
+                          className="kf-btn kf-btn-ghost mt-8">
                     Send another enquiry
                   </button>
                 </div>
@@ -1670,10 +1566,8 @@ function AccordionRow({ item, open, onToggle, index }) {
           {String(index + 1).padStart(2, '0')}
         </span>
         <span className="kf-display flex-1 text-lg font-semibold sm:text-xl">{item.q}</span>
-        <span
-          className="shrink-0 transition-transform"
-          style={{ color: open ? 'var(--gold)' : 'var(--mute)', transform: open ? 'rotate(45deg)' : 'none' }}
-        >
+        <span className="shrink-0 transition-transform"
+              style={{ color: open ? 'var(--gold)' : 'var(--mute)', transform: open ? 'rotate(45deg)' : 'none' }}>
           <Ico name="plus" className="w-5 h-5" />
         </span>
       </button>
@@ -1731,7 +1625,8 @@ function Contact() {
   ];
   return (
     <section id="contact" className="relative overflow-hidden" style={{ background: '#0E1013', borderTop: '1px solid var(--steel)' }}>
-      <div className="pointer-events-none absolute inset-0" style={{ backgroundImage: 'radial-gradient(circle at 50% 110%, rgba(211,167,95,.16), transparent 55%)' }} />
+      <div className="pointer-events-none absolute inset-0"
+           style={{ backgroundImage: 'radial-gradient(circle at 50% 110%, rgba(211,167,95,.16), transparent 55%)' }} />
       <div className="relative mx-auto max-w-7xl px-6 py-24 lg:py-32">
         <Reveal>
           <SectionHead
@@ -1793,7 +1688,7 @@ function Footer() {
       <div className="mx-auto max-w-7xl px-6 py-16 lg:py-20">
         <div className="grid gap-12 lg:grid-cols-12">
           <div className="lg:col-span-4">
-            <Logo />
+            <Logo height={72} maxWidth={280} />
             <p className="kf-mute mt-6 max-w-sm text-sm leading-relaxed">
               Knight Flame manufactures gas stoves, hobtops, pressure cookers, cookware and kitchen
               appliances in India. Serving you since 2010.
@@ -1815,11 +1710,9 @@ function Footer() {
           ))}
         </div>
 
-        <div
-          className="mt-14 flex flex-col gap-4 pt-8 sm:flex-row sm:items-center sm:justify-between"
-          style={{ borderTop: '1px solid var(--steel)' }}
-        >
-          <p className="kf-mute text-xs">© {new Date().getFullYear()} {BRAND.name}. All rights reserved.</p>
+        <div className="mt-14 flex flex-col gap-4 pt-8 sm:flex-row sm:items-center sm:justify-between"
+             style={{ borderTop: '1px solid var(--steel)' }}>
+          <p className="kf-mute text-xs">© {new Date().getFullYear()} {BRAND.name}. All rights reserved | Powered By <Link href="https://www.cybertricksmedia.com/" className="text-[#D3A75F]">Cybertricksmedia Pvt Ltd</Link></p>
           <p className="kf-util text-[10px]" style={{ color: '#4E535B' }}>Serving you since 2010</p>
         </div>
       </div>
